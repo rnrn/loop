@@ -6,7 +6,12 @@
   "description": "Loop Engineering masterclass: browser voice recorder with AI agent",
   "scripts": {
     "dev": "node dev-server.js",
-    "test": "node --test \"tests/**/*.test.js\""
+    "test": "node tools/test.mjs",
+    "test:all": "node tools/test.mjs --all",
+    "story": "node tools/story.mjs",
+    "story:next": "node tools/story.mjs next",
+    "story:set": "node tools/story.mjs set",
+    "story:reset": "node tools/story.mjs reset"
   },
   "engines": {
     "node": ">=20"

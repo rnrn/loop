@@ -4,9 +4,10 @@
 Status: done
 
 Automated evidence:
-- Command: npm run test:story1
+- Command: npm test (активный этап — Story 1)
 - Result: PASS — tests 8, pass 8, fail 0
-  (до реализации: npm test → tests 17, pass 0, fail 17 — ожидаемый стартовый FAIL)
+  (до реализации: tests 8, pass 0, fail 8 — ожидаемый стартовый FAIL
+   ровно по Story 1; этапы Story 2 и change request ещё закрыты)
 
 Manual evidence (Chromium + fake-микрофон, node scenario-run/manual-run.mjs story1):
 - Two recordings created: PASS — 2 карточки
@@ -24,8 +25,10 @@ Issues and decisions:
 Status: done
 
 Automated evidence:
-- Command: npm test (полный набор)
-- Result: PASS — tests 17, pass 17, fail 0 (Story 1 не регрессировала)
+- Command: npm test (после npm run story:next — активен Story 2)
+- Result: PASS — tests 17, pass 17, fail 0 (Story 1 не регрессировала;
+  открытый этап всегда тянет за собой предыдущие)
+  (сразу после открытия этапа: tests 17, pass 8, fail 9 — новый FAIL)
 
 Manual evidence (node scenario-run/manual-run.mjs fallback | story2):
 - Phrase recorded: «Сегодня мы проверяем расшифровку голосовой заметки»
@@ -49,8 +52,9 @@ Issues and decisions:
 Status: done
 
 Evidence:
-- Стартовый FAIL после выдачи tests/collapse-transcript.test.js:
-  npm test → tests 18, pass 17, fail 1 (toggleExpanded отсутствовал)
+- Стартовый FAIL после npm run story:next (открыт этап change request):
+  npm test → tests 18, pass 17, fail 1 — файл теста не импортируется,
+  потому что toggleExpanded отсутствует
 - Four-line collapsed state: PASS — computed -webkit-line-clamp = 4,
   в раскрытом состоянии clamp снят
 - Expand/collapse works: PASS — клик по тексту раскрывает,

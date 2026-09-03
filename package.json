@@ -10,9 +10,11 @@
 
     "dev": "npm --prefix voice-notes-workshop run dev",
     "test": "npm --prefix voice-notes-workshop test",
-    "test:story1": "npm --prefix voice-notes-workshop run test:story1",
-    "test:story2": "npm --prefix voice-notes-workshop run test:story2",
-    "test:cr": "npm --prefix voice-notes-workshop run test:cr",
+    "test:all": "npm --prefix voice-notes-workshop run test:all",
+
+    "story": "npm --prefix voice-notes-workshop run story",
+    "story:next": "npm --prefix voice-notes-workshop run story:next",
+    "story:reset": "npm --prefix voice-notes-workshop run story:reset",
 
     "scenario": "node scenario-run/manual-run.mjs",
     "scenario:story1": "node scenario-run/manual-run.mjs story1",

@@ -60,6 +60,10 @@ const REQUIRED = [
   'voice-notes-workshop/src/speech-recognition.js',
   'voice-notes-workshop/tests/recordings-store.test.js',
   'voice-notes-workshop/tests/speech-recognition.test.js',
+  'voice-notes-workshop/tests/collapse-transcript.test.js',
+  'voice-notes-workshop/tools/stages.mjs',
+  'voice-notes-workshop/tools/test.mjs',
+  'voice-notes-workshop/tools/story.mjs',
   'scenario-run/manual-run.mjs',
 ];
 
@@ -131,11 +135,14 @@ if (quick) {
   const startCp = join(CHECKPOINTS, 'checkpoint-00-start');
   if (existsSync(startCp)) {
     const start = testCounts(startCp);
-    // Стартовое состояние ОБЯЗАНО быть красным: с него начинается loop.
-    if (start.pass === 0 && start.fail > 0) {
-      ok(`checkpoint-00-start красный, как и должен быть: fail ${start.fail}/${start.tests}`);
+    // Стартовое состояние ОБЯЗАНО быть красным ровно по Story 1:
+    // участник видит FAIL своей задачи, а не всего курса.
+    if (start.pass === 0 && start.fail === 8 && start.tests === 8) {
+      ok(`checkpoint-00-start красный ровно по Story 1: fail ${start.fail}/${start.tests}`);
     } else {
-      fail(`checkpoint-00-start не в стартовом состоянии: pass ${start.pass}, fail ${start.fail}`);
+      fail(
+        `checkpoint-00-start не в стартовом состоянии: pass ${start.pass}, fail ${start.fail}, всего ${start.tests} (ожидалось 0/8)`,
+      );
       problems += 1;
     }
   }
