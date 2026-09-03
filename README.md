@@ -3,8 +3,8 @@
 Мастер-класс: полный инженерный цикл Story → FAIL → реализация → проверка →
 исправление → PASS на примере браузерного диктофона с расшифровкой.
 
-Проект восстановлен из `loop_engineering_voice_recorder_masterclass (2).docx`
-и прогнан по сценарию целиком.
+Проект восстановлен из методички мастер-класса и прогнан по сценарию целиком.
+Сама методичка в репозиторий не входит — она у модератора.
 
 ## Быстрый старт
 
@@ -60,7 +60,6 @@ npm run bootstrap -- --quick           # без финальной самопр�
 | `checkpoints/checkpoint-03-collapse` | После change request |
 | `scripts/` | bootstrap, preflight, checkpoint, verify |
 | `scenario-run/manual-run.mjs` | Автопрогон ручного сценария в живом Chromium |
-| `doc.txt` | Текст исходного docx |
 
 Структура `voice-notes-workshop/` соответствует §3.6; содержимое `SPEC.md`,
 `LOOP.md`, `AGENTS.md`, `stories/`, `change-requests/`, `progress.md` взято
