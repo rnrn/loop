@@ -1,0 +1,17 @@
+{
+  "name": "voice-notes-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Loop Engineering masterclass: browser voice recorder with AI agent",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:story1": "node --test tests/recordings-store.test.js",
+    "test:story2": "node --test tests/speech-recognition.test.js",
+    "test:cr": "node --test tests/collapse-transcript.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

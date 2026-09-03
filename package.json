@@ -1,0 +1,33 @@
+{
+  "name": "loop-engineering-voice-recorder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Мастер-класс Loop Engineering: браузерный диктофон с ИИ-агентом — стартер, чекпоинты и прогон сценария",
+  "scripts": {
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "preflight": "node scripts/preflight.mjs",
+
+    "dev": "npm --prefix voice-notes-workshop run dev",
+    "test": "npm --prefix voice-notes-workshop test",
+    "test:story1": "npm --prefix voice-notes-workshop run test:story1",
+    "test:story2": "npm --prefix voice-notes-workshop run test:story2",
+    "test:cr": "npm --prefix voice-notes-workshop run test:cr",
+
+    "scenario": "node scenario-run/manual-run.mjs",
+    "scenario:story1": "node scenario-run/manual-run.mjs story1",
+    "scenario:fallback": "node scenario-run/manual-run.mjs fallback",
+    "scenario:story2": "node scenario-run/manual-run.mjs story2",
+    "scenario:cr": "node scenario-run/manual-run.mjs cr",
+    "scenario:all": "node scripts/run-all-scenarios.mjs",
+
+    "checkpoint": "node scripts/checkpoint.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

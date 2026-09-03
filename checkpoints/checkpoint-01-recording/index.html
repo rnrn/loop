@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Голосовые заметки — Loop Engineering workshop</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <h1>Голосовые заметки</h1>
+        <p class="app__hint">
+          Подготовьте микрофон, затем зажмите кнопку и произнесите фразу.
+        </p>
+      </header>
+
+      <section class="recorder">
+        <button id="prepare-button" class="button button--primary" type="button">
+          Подготовить микрофон
+        </button>
+
+        <button id="record-button" class="button button--record" type="button" hidden>
+          Зажмите, чтобы записать
+        </button>
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+        <p id="error" class="error" role="alert"></p>
+      </section>
+
+      <section aria-labelledby="recordings-title">
+        <h2 id="recordings-title" class="recordings__title">Записи</h2>
+        <ul id="recordings" class="recordings"></ul>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

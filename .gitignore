@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+
+# рабочие снимки модератора, создаваемые через `npm run checkpoint -- save`
+checkpoints/before-rollback/

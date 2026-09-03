@@ -1,0 +1,145 @@
+:root {
+  --bg: #12141a;
+  --panel: #1b1e26;
+  --text: #e9ecf2;
+  --muted: #99a1b3;
+  --accent: #4f7cff;
+  --danger: #ff6b6b;
+  --ok: #4ade80;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.app__header h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+}
+
+.app__hint {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.recorder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 20px;
+  background: var(--panel);
+  border-radius: 12px;
+}
+
+.button {
+  font: inherit;
+  color: var(--text);
+  background: #2a2f3c;
+  border: 1px solid #39404f;
+  border-radius: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.button--record {
+  min-width: 260px;
+  padding: 18px 24px;
+  font-size: 17px;
+  touch-action: none; /* pointer capture без скролла */
+  user-select: none;
+}
+
+.button--record[data-state="RECORDING"] {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.button--record[data-state="PROCESSING"] {
+  opacity: 0.6;
+}
+
+.button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.error:empty {
+  display: none;
+}
+
+.recordings__title {
+  font-size: 18px;
+  margin: 32px 0 12px;
+}
+
+.recordings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card__meta {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.card audio {
+  width: 100%;
+}
+
+.card__transcript {
+  margin: 0;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+
+.card__transcript--muted {
+  color: var(--muted);
+  font-style: italic;
+}
