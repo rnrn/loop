@@ -8,6 +8,8 @@
     "dev": "node dev-server.js",
     "test": "node tools/test.mjs",
     "test:all": "node tools/test.mjs --all",
+    "trace": "node tools/trace.mjs",
+    "trace:all": "node tools/trace.mjs --all",
     "story": "node tools/story.mjs",
     "story:next": "node tools/story.mjs next",
     "story:set": "node tools/story.mjs set",

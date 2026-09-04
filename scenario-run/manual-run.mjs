@@ -23,9 +23,15 @@ const BASE = `http://localhost:${PORT}`;
 
 const stage = process.argv[2] ?? 'story1';
 const checks = [];
+// Та же шкала, что в npm test: красный не используем, провал ручной проверки —
+// это работа для следующей итерации, а не авария.
+const COLOR = !process.env.NO_COLOR;
+const col = (code, s) => (COLOR ? `[${code}m${s}[0m` : s);
+
 const record = (name, ok, detail = '') => {
   checks.push({ name, ok, detail });
-  console.log(`${ok ? '[PASS]' : '[FAIL]'} ${name}${detail ? ` — ${detail}` : ''}`);
+  const tag = ok ? col('1;92', '[PASS]') : col('1;93', '[FAIL]');
+  console.log(`${tag} ${name}${detail ? ` — ${detail}` : ''}`);
 };
 
 // --- dev server ------------------------------------------------------------
@@ -88,31 +94,31 @@ async function hold(ms, releaseOutside = false) {
 await page.click('#prepare-button');
 await page.waitForTimeout(400);
 record(
-  'Микрофон подготовлен, кнопка перешла в READY',
+  'S1-01/S1-02  микрофон подготовлен, кнопка перешла в READY',
   (await recordBtn.getAttribute('data-state')) === 'READY',
   `data-state=${await recordBtn.getAttribute('data-state')}`,
 );
 
 // Запись 1: «Первая тестовая голосовая заметка»
 await hold(1000);
-record('Запись 1 создана', (await cards.count()) === 1, `карточек: ${await cards.count()}`);
+record('S1-05  запись 1 создана', (await cards.count()) === 1, `карточек: ${await cards.count()}`);
 record(
-  'Кнопка вернулась в READY после записи',
+  'S1-02  кнопка вернулась в READY после записи',
   (await recordBtn.getAttribute('data-state')) === 'READY',
 );
 
 // Запись 2: «Вторая запись должна находиться сверху» + отпускание ВНЕ кнопки
 await hold(1000, true);
 const count = await cards.count();
-record('Созданы две записи', count === 2, `карточек: ${count}`);
-record('Отпускание вне кнопки завершило запись ровно один раз', count === 2);
+record('S1-07  созданы две записи', count === 2, `карточек: ${count}`);
+record('S1-04  отпускание вне кнопки завершило запись ровно один раз', count === 2);
 
 // Порядок: новая сверху
 const order = await page.$$eval('#recordings .card', (els) =>
   els.map((el) => el.querySelector('.card__meta')?.textContent ?? ''),
 );
 const ids = await page.$$eval('#recordings .card', (els) => els.map((el) => el.dataset.id));
-record('Новая запись находится выше первой', new Set(ids).size === 2 && ids.length === 2, order.join(' | '));
+record('S1-06  новая запись находится выше первой', new Set(ids).size === 2 && ids.length === 2, order.join(' | '));
 
 // Воспроизведение обеих записей
 const playable = await page.$$eval('#recordings audio', async (els) =>
@@ -128,7 +134,7 @@ const playable = await page.$$eval('#recordings audio', async (els) =>
     }),
   ),
 );
-record('Обе записи воспроизводятся', playable.length === 2 && playable.every(Boolean), JSON.stringify(playable));
+record('S1-05  обе записи воспроизводятся', playable.length === 2 && playable.every(Boolean), JSON.stringify(playable));
 
 // --- Story 2 / change request ---------------------------------------------
 
@@ -140,19 +146,19 @@ if (stage !== 'story1') {
   // «Расшифровка…» — это pending, а не результат: карточка не должна на нём застревать.
   const okText = first.length > 0 && first !== 'Расшифровка…';
   record(
-    'Карточка показывает расшифровку или согласованный fallback',
+    'S2-07  карточка показывает расшифровку или согласованный fallback',
     okText,
     JSON.stringify(first.slice(0, 60)),
   );
   if (stage === 'story2') {
     record(
-      'mock-STT: в карточке непустой текст расшифровки',
+      'S2-04  mock-STT: текст попал именно в свою карточку',
       first.includes('расшифровку голосовой заметки'),
       JSON.stringify(first.slice(0, 60)),
     );
   }
   record(
-    'Аудио не пропало после STT (регрессия Story 1)',
+    'S2-06  аудио не пропало после STT',
     (await page.locator('#recordings audio').count()) === 2,
   );
 }
@@ -163,10 +169,10 @@ if (stage === 'cr') {
   const toggle = card.locator('.card__transcript[aria-expanded]');
   const toggleButton = card.locator('.card__toggle');
   const hasToggle = (await toggle.count()) > 0;
-  record('У блока расшифровки есть aria-expanded', hasToggle);
+  record('CR-07  у блока расшифровки есть aria-expanded', hasToggle);
 
   if (hasToggle) {
-    record('По умолчанию текст свёрнут', (await toggle.getAttribute('aria-expanded')) === 'false');
+    record('CR-01  по умолчанию текст свёрнут', (await toggle.getAttribute('aria-expanded')) === 'false');
 
     const collapsedLines = await page.$$eval('#recordings .card__transcript', (els) => {
       const el = els[0];
@@ -174,23 +180,23 @@ if (stage === 'cr') {
       return { clamp: cs.webkitLineClamp, height: el.clientHeight, scroll: el.scrollHeight };
     });
     record(
-      'Свёрнутое состояние ограничено четырьмя строками',
+      'CR-01  свёрнутое состояние ограничено четырьмя строками',
       collapsedLines.clamp === '4',
       `line-clamp=${collapsedLines.clamp}`,
     );
 
     await toggle.click();
     await page.waitForTimeout(150);
-    record('Клик по тексту раскрывает его', (await toggle.getAttribute('aria-expanded')) === 'true');
+    record('CR-04  клик по тексту раскрывает его', (await toggle.getAttribute('aria-expanded')) === 'true');
     record(
-      'В раскрытом состоянии line-clamp снят',
+      'CR-02  в раскрытом состоянии line-clamp снят',
       (await toggle.evaluate((el) => getComputedStyle(el).webkitLineClamp)) !== '4',
     );
 
     await toggleButton.click();
     await page.waitForTimeout(150);
     record(
-      'Отдельная кнопка сворачивает текст',
+      'CR-04  отдельная кнопка сворачивает текст',
       (await toggle.getAttribute('aria-expanded')) === 'false',
     );
 
@@ -198,7 +204,7 @@ if (stage === 'cr') {
     await page.locator('#recordings audio').first().click({ position: { x: 10, y: 10 } });
     await page.waitForTimeout(150);
     record(
-      'Клик по audio не меняет expanded',
+      'CR-05  клик по audio не меняет expanded',
       (await toggle.getAttribute('aria-expanded')) === 'false',
     );
 
@@ -209,7 +215,7 @@ if (stage === 'cr') {
       els.map((el) => el.querySelector('.card__transcript')?.getAttribute('aria-expanded') ?? 'none'),
     );
     record(
-      'Состояние expanded хранится для конкретной записи',
+      'CR-06  состояние expanded хранится для конкретной записи',
       perCard[0] === 'true' && perCard.slice(1).every((v) => v !== 'true'),
       JSON.stringify(perCard),
     );
@@ -217,7 +223,7 @@ if (stage === 'cr') {
     await page.waitForTimeout(150);
 
     record(
-      'Аудиоплеер и метаданные видимы в свёрнутом состоянии',
+      'CR-03  аудиоплеер и метаданные видимы в свёрнутом состоянии',
       (await page.locator('#recordings .card__meta').first().isVisible()) &&
         (await page.locator('#recordings audio').first().isVisible()),
     );
@@ -225,7 +231,7 @@ if (stage === 'cr') {
 }
 
 // Консоль
-record('В консоли нет необработанных ошибок', consoleErrors.length === 0, consoleErrors.join(' / '));
+record('S1-08  в консоли нет необработанных ошибок', consoleErrors.length === 0, consoleErrors.join(' / '));
 
 // --- итог ------------------------------------------------------------------
 

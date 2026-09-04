@@ -5,8 +5,8 @@ Status: done
 
 Automated evidence:
 - Command: npm test (активный этап — Story 1)
-- Result: PASS — tests 8, pass 8, fail 0
-  (до реализации: tests 8, pass 0, fail 8 — ожидаемый стартовый FAIL
+- Result: PASS — tests 9, pass 9, fail 0
+  (до реализации: tests 9, pass 0, fail 9 — ожидаемый стартовый FAIL
    ровно по Story 1; этапы Story 2 и change request ещё закрыты)
 
 Manual evidence (Chromium + fake-микрофон, node scenario-run/manual-run.mjs story1):
@@ -26,9 +26,9 @@ Status: done
 
 Automated evidence:
 - Command: npm test (после npm run story:next — активен Story 2)
-- Result: PASS — tests 17, pass 17, fail 0 (Story 1 не регрессировала;
+- Result: PASS — tests 20, pass 20, fail 0 (Story 1 не регрессировала;
   открытый этап всегда тянет за собой предыдущие)
-  (сразу после открытия этапа: tests 17, pass 8, fail 9 — новый FAIL)
+  (сразу после открытия этапа: tests 20, pass 9, fail 11 — новый FAIL)
 
 Manual evidence (node scenario-run/manual-run.mjs fallback | story2):
 - Phrase recorded: «Сегодня мы проверяем расшифровку голосовой заметки»
@@ -53,7 +53,7 @@ Status: done
 
 Evidence:
 - Стартовый FAIL после npm run story:next (открыт этап change request):
-  npm test → tests 18, pass 17, fail 1 — файл теста не импортируется,
+  npm test → tests 21, pass 20, fail 1 — файл теста не импортируется,
   потому что toggleExpanded отсутствует
 - Four-line collapsed state: PASS — computed -webkit-line-clamp = 4,
   в раскрытом состоянии clamp снят
@@ -62,7 +62,7 @@ Evidence:
 - Audio controls unaffected: PASS — клик по audio не меняет expanded;
   плеер и метаданные видимы в свёрнутом состоянии
 - Состояние expanded хранится для конкретной записи: PASS — ["true","false"]
-- Full npm test result: PASS — tests 21, pass 21, fail 0
+- Full npm test result: PASS — tests 24, pass 24, fail 0
 - Ручной сценарий: node scenario-run/manual-run.mjs cr → 19/19
 
 ## Definition of Done мастер-класса (§7.7)
@@ -73,6 +73,6 @@ Evidence:
 - [PASS] Новая запись появляется сверху.
 - [PASS] Созданы и воспроизводятся не менее двух записей.
 - [PASS] STT показывает текст или согласованный fallback (проверены обе ветки).
-- [PASS] Полный npm test проходит — 21/21.
+- [PASS] Полный npm test проходит — 24/24.
 - [PASS] В консоли нет необработанных ошибок.
 - [PASS] progress.md содержит автоматические и ручные доказательства.

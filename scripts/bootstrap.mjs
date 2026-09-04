@@ -137,11 +137,11 @@ if (quick) {
     const start = testCounts(startCp);
     // Стартовое состояние ОБЯЗАНО быть красным ровно по Story 1:
     // участник видит FAIL своей задачи, а не всего курса.
-    if (start.pass === 0 && start.fail === 8 && start.tests === 8) {
+    if (start.pass === 0 && start.fail === 9 && start.tests === 9) {
       ok(`checkpoint-00-start красный ровно по Story 1: fail ${start.fail}/${start.tests}`);
     } else {
       fail(
-        `checkpoint-00-start не в стартовом состоянии: pass ${start.pass}, fail ${start.fail}, всего ${start.tests} (ожидалось 0/8)`,
+        `checkpoint-00-start не в стартовом состоянии: pass ${start.pass}, fail ${start.fail}, всего ${start.tests} (ожидалось 0/9)`,
       );
       problems += 1;
     }

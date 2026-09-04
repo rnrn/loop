@@ -3,7 +3,7 @@
 import { existsSync, cpSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  ROOT, WORKSHOP, CHECKPOINTS, run, testCounts, ok, fail, info, step,
+  ROOT, WORKSHOP, CHECKPOINTS, NPM, run, testCounts, ok, fail, info, step,
 } from './shared.mjs';
 
 const checks = [];
@@ -16,10 +16,10 @@ const record = (name, passed, detail = '') => {
 // Счётчики отражают ОБЛАСТЬ АКТИВНОГО ЭТАПА: в начале участник видит
 // только тесты Story 1, а не весь курс.
 const EXPECTED = [
-  { dir: 'checkpoint-00-start', script: 'test', pass: 0, total: 8, note: 'стартовый FAIL, только Story 1' },
-  { dir: 'checkpoint-01-recording', script: 'test', pass: 8, total: 8, note: 'Story 1' },
-  { dir: 'checkpoint-02-stt', script: 'test', pass: 17, total: 17, note: 'Story 2 + регрессия' },
-  { dir: 'checkpoint-03-collapse', script: 'test', pass: 21, total: 21, note: 'change request + регрессия' },
+  { dir: 'checkpoint-00-start', script: 'test', pass: 0, total: 9, note: 'стартовый FAIL, только Story 1' },
+  { dir: 'checkpoint-01-recording', script: 'test', pass: 9, total: 9, note: 'Story 1' },
+  { dir: 'checkpoint-02-stt', script: 'test', pass: 20, total: 20, note: 'Story 2 + регрессия' },
+  { dir: 'checkpoint-03-collapse', script: 'test', pass: 24, total: 24, note: 'change request + регрессия' },
 ];
 
 step('Рабочее дерево');
@@ -45,6 +45,15 @@ for (const exp of EXPECTED) {
   );
 }
 
+step('Согласованность Story и тестов');
+// Каждый auto-критерий должен иметь тест с его кодом, и наоборот.
+const trace = run(NPM, ['--prefix', WORKSHOP, 'run', 'trace:all'], { stdio: 'pipe' });
+record(
+  'коды acceptance criteria совпадают в Story и тестах',
+  trace.status === 0,
+  trace.status === 0 ? '' : 'см. npm run trace:all',
+);
+
 step('Переход между этапами');
 // Суть loop: открыли следующую Story — система снова стала незавершённой.
 // Проверяем на копии, чтобы не трогать сами чекпоинты.
@@ -54,13 +63,13 @@ try {
   cpSync(join(CHECKPOINTS, 'checkpoint-01-recording'), probe, { recursive: true });
 
   const before = testCounts(probe);
-  record('checkpoint-01 на Story 1 зелёный', before.fail === 0 && before.pass === 8, `pass ${before.pass}/${before.tests}`);
+  record('checkpoint-01 на Story 1 зелёный', before.fail === 0 && before.pass === 9, `pass ${before.pass}/${before.tests}`);
 
   run(process.execPath, ['tools/story.mjs', 'set', 'story-2'], { cwd: probe, stdio: 'pipe' });
   const after = testCounts(probe);
   record(
     'после story:set story-2 появляется FAIL нового этапа',
-    after.fail > 0 && after.pass === 8,
+    after.fail > 0 && after.pass === 9,
     `pass ${after.pass}/${after.tests}, fail ${after.fail}`,
   );
 } finally {

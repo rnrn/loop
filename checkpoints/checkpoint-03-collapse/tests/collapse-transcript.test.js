@@ -1,5 +1,8 @@
 // Change request — automated checks (SPEC §7.4)
-// Файл выдаётся модератором на этапе 14 вместе с change request.
+// Этап открывается модератором: npm run story:next.
+//
+// Имя каждого теста начинается с кода acceptance criterion из
+// change-requests/1-collapse-long-transcripts.md.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -9,12 +12,14 @@ import {
   toggleExpanded,
 } from '../src/recordings-store.js';
 
-test('по умолчанию expanded равен false', () => {
+// --- CR-06  Состояние expanded принадлежит конкретной записи ---------------
+
+test('CR-06  по умолчанию expanded равен false', () => {
   const rec = createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 });
   assert.equal(rec.expanded, false);
 });
 
-test('toggleExpanded меняет expanded только у указанной записи', () => {
+test('CR-06  toggleExpanded меняет expanded только у указанной записи', () => {
   let list = prependRecording(createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 }), []);
   list = prependRecording(createRecording({ id: 'b', audioUrl: 'blob:b', createdAt: 2 }), list);
 
@@ -25,13 +30,13 @@ test('toggleExpanded меняет expanded только у указанной з
   assert.equal(byId.b.expanded, false);
 });
 
-test('toggleExpanded возвращает запись обратно в свёрнутое состояние', () => {
+test('CR-06  toggleExpanded возвращает запись обратно в свёрнутое состояние', () => {
   const list = prependRecording(createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 }), []);
   const next = toggleExpanded(toggleExpanded(list, 'a'), 'a');
   assert.equal(next[0].expanded, false);
 });
 
-test('toggleExpanded не трогает аудио и расшифровку', () => {
+test('CR-06  toggleExpanded не трогает аудио и расшифровку', () => {
   const list = prependRecording(createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 }), []);
   const next = toggleExpanded(list, 'a');
   assert.equal(next[0].audioUrl, 'blob:a');

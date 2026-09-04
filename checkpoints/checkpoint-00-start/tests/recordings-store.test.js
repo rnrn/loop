@@ -1,5 +1,9 @@
 // Story 1 — automated checks (SPEC §7.2)
 // READ-ONLY во время мастер-класса: тесты нельзя ослаблять ради зелёного результата.
+//
+// Имя каждого теста начинается с кода acceptance criterion из
+// stories/1-record-audio.md. Коды идут по возрастанию — порядок появления
+// функциональности одинаково виден и в Story, и в выводе тестов.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -31,35 +35,62 @@ function fakeRecorder() {
   };
 }
 
-// --- 7.2.1 -----------------------------------------------------------------
+class DOMExceptionLike extends Error {
+  constructor(name, message) {
+    super(message);
+    this.name = name;
+  }
+}
 
-test('prependRecording ставит новую запись первой', () => {
-  const first = createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 });
-  const second = createRecording({ id: 'b', audioUrl: 'blob:b', createdAt: 2 });
+// --- S1-02  После разрешения интерфейс переходит в READY -------------------
 
-  const list = prependRecording(second, [first]);
+test('S1-02  подготовка микрофона переводит NEEDS_PERMISSION → READY', async () => {
+  const machine = createRecorderMachine({
+    getStream: async () => ({ id: 'stream' }),
+    createRecorder: () => fakeRecorder(),
+  });
 
-  assert.equal(list.length, 2);
-  assert.equal(list[0].id, 'b');
-  assert.equal(list[1].id, 'a');
+  assert.equal(machine.state, STATES.NEEDS_PERMISSION);
+  await machine.prepare();
+  assert.equal(machine.state, STATES.READY);
 });
 
-test('prependRecording не мутирует исходный массив', () => {
-  const existing = [createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 })];
-  prependRecording(createRecording({ id: 'b', audioUrl: 'blob:b', createdAt: 2 }), existing);
-  assert.equal(existing.length, 1);
+test('S1-02  состояние возвращается из PROCESSING в READY после создания записи', async () => {
+  const machine = createRecorderMachine({
+    getStream: async () => ({ id: 'stream' }),
+    createRecorder: () => fakeRecorder(),
+  });
+
+  await machine.prepare();
+  machine.startRecording();
+  assert.equal(machine.state, STATES.RECORDING);
+
+  machine.stopRecording();
+  assert.equal(machine.state, STATES.PROCESSING);
+
+  machine.finishProcessing();
+  assert.equal(machine.state, STATES.READY);
 });
 
-test('createRecording задаёт стартовые поля записи', () => {
-  const rec = createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 10 });
-  assert.equal(rec.transcript, '');
-  assert.equal(rec.transcriptStatus, 'pending');
-  assert.equal(rec.expanded, false);
+// --- S1-03  pointerdown начинает запись только из READY --------------------
+
+test('S1-03  pointerdown не начинает запись без разрешения', () => {
+  const recorder = fakeRecorder();
+  const machine = createRecorderMachine({
+    getStream: async () => ({ id: 'stream' }),
+    createRecorder: () => recorder,
+  });
+
+  const started = machine.startRecording();
+
+  assert.equal(started, false);
+  assert.equal(machine.state, STATES.NEEDS_PERMISSION);
+  assert.equal(recorder.calls.includes('start'), false);
 });
 
-// --- 7.2.2 -----------------------------------------------------------------
+// --- S1-04  Безопасная остановка -------------------------------------------
 
-test('повторный stop не вызывает MediaRecorder.stop(), если recorder уже inactive', async () => {
+test('S1-04  повторный stop не вызывает MediaRecorder.stop(), если recorder уже inactive', async () => {
   const recorder = fakeRecorder();
   const machine = createRecorderMachine({
     getStream: async () => ({ id: 'stream' }),
@@ -76,47 +107,38 @@ test('повторный stop не вызывает MediaRecorder.stop(), есл
   assert.equal(recorder.calls.filter((c) => c === 'stop').length, 1);
 });
 
-// --- 7.2.3 -----------------------------------------------------------------
+// --- S1-05  Модель созданной записи ----------------------------------------
 
-test('состояние возвращается из PROCESSING в READY после создания записи', async () => {
-  const machine = createRecorderMachine({
-    getStream: async () => ({ id: 'stream' }),
-    createRecorder: () => fakeRecorder(),
-  });
-
-  assert.equal(machine.state, STATES.NEEDS_PERMISSION);
-
-  await machine.prepare();
-  assert.equal(machine.state, STATES.READY);
-
-  machine.startRecording();
-  assert.equal(machine.state, STATES.RECORDING);
-
-  machine.stopRecording();
-  assert.equal(machine.state, STATES.PROCESSING);
-
-  machine.finishProcessing();
-  assert.equal(machine.state, STATES.READY);
+test('S1-05  createRecording задаёт стартовые поля записи', () => {
+  const rec = createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 10 });
+  assert.equal(rec.audioUrl, 'blob:a');
+  assert.equal(rec.transcript, '');
+  assert.equal(rec.transcriptStatus, 'pending');
+  assert.equal(rec.expanded, false);
 });
 
-test('pointerdown начинает запись только из состояния READY', () => {
-  const recorder = fakeRecorder();
-  const machine = createRecorderMachine({
-    getStream: async () => ({ id: 'stream' }),
-    createRecorder: () => recorder,
-  });
+// --- S1-06  Новая запись в начале списка -----------------------------------
 
-  // ещё нет разрешения — запись не должна стартовать
-  const started = machine.startRecording();
+test('S1-06  prependRecording ставит новую запись первой', () => {
+  const first = createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 });
+  const second = createRecording({ id: 'b', audioUrl: 'blob:b', createdAt: 2 });
 
-  assert.equal(started, false);
-  assert.equal(machine.state, STATES.NEEDS_PERMISSION);
-  assert.equal(recorder.calls.includes('start'), false);
+  const list = prependRecording(second, [first]);
+
+  assert.equal(list.length, 2);
+  assert.equal(list[0].id, 'b');
+  assert.equal(list[1].id, 'a');
 });
 
-// --- 7.2.4 -----------------------------------------------------------------
+test('S1-06  prependRecording не мутирует исходный массив', () => {
+  const existing = [createRecording({ id: 'a', audioUrl: 'blob:a', createdAt: 1 })];
+  prependRecording(createRecording({ id: 'b', audioUrl: 'blob:b', createdAt: 2 }), existing);
+  assert.equal(existing.length, 1);
+});
 
-test('ошибка подготовки микрофона переводит в ERROR без исключения', async () => {
+// --- S1-08  Ошибка доступа --------------------------------------------------
+
+test('S1-08  ошибка подготовки микрофона переводит в ERROR без исключения', async () => {
   const machine = createRecorderMachine({
     getStream: async () => {
       throw new DOMExceptionLike('NotAllowedError', 'Permission denied');
@@ -131,7 +153,7 @@ test('ошибка подготовки микрофона переводит в
   assert.equal(typeof machine.errorMessage, 'string');
 });
 
-test('после ERROR подготовку можно повторить и вернуться в READY', async () => {
+test('S1-08  после ERROR подготовку можно повторить и вернуться в READY', async () => {
   let shouldFail = true;
   const machine = createRecorderMachine({
     getStream: async () => {
@@ -149,10 +171,3 @@ test('после ERROR подготовку можно повторить и в�
   assert.equal(machine.state, STATES.READY);
   assert.equal(machine.errorMessage, '');
 });
-
-class DOMExceptionLike extends Error {
-  constructor(name, message) {
-    super(message);
-    this.name = name;
-  }
-}

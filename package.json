@@ -11,6 +11,8 @@
     "dev": "npm --prefix voice-notes-workshop run dev",
     "test": "npm --prefix voice-notes-workshop test",
     "test:all": "npm --prefix voice-notes-workshop run test:all",
+    "trace": "npm --prefix voice-notes-workshop run trace",
+    "trace:all": "npm --prefix voice-notes-workshop run trace:all",
 
     "story": "npm --prefix voice-notes-workshop run story",
     "story:next": "npm --prefix voice-notes-workshop run story:next",
