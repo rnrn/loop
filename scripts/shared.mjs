@@ -16,7 +16,11 @@ export const CHECKPOINT_NAMES = [
 
 // Яркие варианты (9x) вместо базовых (3x): на тёмной теме терминала и на
 // проекторе базовый красный/жёлтый читаются плохо. NO_COLOR=1 отключает цвет.
-const COLOR = !process.env.NO_COLOR;
+// Без проверки isTTY ANSI-коды печатаются буквально при перенаправлении вывода
+// и в консолях без Virtual Terminal. FORCE_COLOR=1 включает принудительно.
+const COLOR = process.env.NO_COLOR
+  ? false
+  : Boolean(process.env.FORCE_COLOR) || Boolean(process.stdout.isTTY);
 const ESC = '\u001b[';
 const c = (code) => (COLOR ? `${ESC}${code}m` : '');
 

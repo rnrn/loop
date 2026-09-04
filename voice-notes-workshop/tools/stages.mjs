@@ -12,6 +12,28 @@ import { dirname, join, resolve } from 'node:path';
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const STATE_FILE = join(ROOT, 'workshop.state.json');
 
+/**
+ * Цвет включаем только если поток действительно его отрисует.
+ * Без проверки isTTY ANSI-коды печатаются буквально при перенаправлении вывода
+ * и в консолях без Virtual Terminal.
+ *   NO_COLOR=1     выключить принудительно
+ *   FORCE_COLOR=1  включить принудительно (например, при пайпе)
+ */
+export function createColors(stream = process.stdout) {
+  const enabled = process.env.NO_COLOR
+    ? false
+    : Boolean(process.env.FORCE_COLOR) || Boolean(stream.isTTY);
+  const c = (code) => (enabled ? `[${code}m` : '');
+  return {
+    enabled,
+    reset: c(0),
+    dim: c(2),
+    bold: c(1),
+    green: c('1;92'),
+    yellow: c('1;93'),
+  };
+}
+
 export const STAGES = [
   {
     id: 'story-1',

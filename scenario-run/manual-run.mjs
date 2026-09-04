@@ -25,7 +25,9 @@ const stage = process.argv[2] ?? 'story1';
 const checks = [];
 // Та же шкала, что в npm test: красный не используем, провал ручной проверки —
 // это работа для следующей итерации, а не авария.
-const COLOR = !process.env.NO_COLOR;
+const COLOR = process.env.NO_COLOR
+  ? false
+  : Boolean(process.env.FORCE_COLOR) || Boolean(process.stdout.isTTY);
 const col = (code, s) => (COLOR ? `[${code}m${s}[0m` : s);
 
 const record = (name, ok, detail = '') => {

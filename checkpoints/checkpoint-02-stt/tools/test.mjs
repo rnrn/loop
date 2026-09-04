@@ -5,17 +5,12 @@
 //   npm test -- --color оставить собственную раскраску node:test (красный)
 
 import { spawn } from 'node:child_process';
-import { ROOT, STAGES, readState, openStages, testFiles, activeIndex } from './stages.mjs';
+import { ROOT, STAGES, readState, openStages, testFiles, activeIndex, createColors } from './stages.mjs';
 
 // Цвет: красный не используем. В этом курсе падение теста — штатное событие,
 // с него начинается цикл. Но выделение упавших строк нужно, иначе взгляду
 // не за что зацепиться, поэтому node:test не гасим, а перекрашиваем в жёлтый.
-const COLOR = !process.env.NO_COLOR;
-const c = (code) => (COLOR ? `[${code}m` : '');
-const RESET = c(0);
-const GREEN = c('1;92');
-const YELLOW = c('1;93');
-const DIM = c(2);
+const { enabled: COLOR, reset: RESET, green: GREEN, yellow: YELLOW, dim: DIM } = createColors();
 
 const argv = process.argv.slice(2);
 const all = argv.includes('--all');

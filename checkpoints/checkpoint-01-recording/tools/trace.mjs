@@ -8,15 +8,9 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, STAGES, readState, openStages, allCriteria } from './stages.mjs';
+import { ROOT, STAGES, readState, openStages, allCriteria, createColors } from './stages.mjs';
 
-const COLOR = !process.env.NO_COLOR;
-const c = (code) => (COLOR ? `[${code}m` : '');
-const RESET = c(0);
-const GREEN = c('1;92');
-const YELLOW = c('1;93');
-const DIM = c(2);
-const BOLD = c(1);
+const { reset: RESET, green: GREEN, yellow: YELLOW, dim: DIM, bold: BOLD } = createColors();
 
 const all = process.argv.includes('--all');
 const stages = all ? STAGES : openStages(readState());
