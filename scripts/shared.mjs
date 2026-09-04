@@ -63,7 +63,8 @@ export function run(command, args, options = {}) {
  */
 export function testCounts(cwd, script = 'test') {
   const res = run(NPM, ['--prefix', cwd, 'run', script], { stdio: 'pipe' });
-  const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
+  // Раннер раскрашивает вывод, поэтому ANSI-коды надо снять до разбора счётчиков.
+  const out = `${res.stdout ?? ''}${res.stderr ?? ''}`.replace(/\[[0-9;]*m/g, '');
   const num = (key) => {
     const m = out.match(new RegExp(`^\\u2139 ${key} (\\d+)$`, 'm'));
     return m ? Number(m[1]) : null;
