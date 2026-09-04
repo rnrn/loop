@@ -21,43 +21,89 @@
 
 ---
 
+Везде одни и те же три шага: **git → Node.js → coding agent**.
+
 ## Windows
 
-```powershell
-winget install OpenJS.NodeJS.LTS
-winget install Git.Git
-winget install Google.Chrome
-```
-
-**Закройте и откройте терминал заново** — иначе `node` не появится в PATH.
-Это причина №1 обращений «у меня не работает».
-
-Затем coding agent, например:
+1. **git** — <https://gitforwindows.org/>
+2. **Node.js** — <https://nodejs.org/dist/v24.20.0/node-v24.20.0-x64.msi> (31 МБ)
+3. **Claude Code** — в PowerShell:
 
 ```powershell
-npm install -g @anthropic-ai/claude-code
-claude          # первый запуск проводит авторизацию
+irm https://claude.ai/install.ps1 | iex
 ```
+
+Браузер: Edge уже стоит, его достаточно. Chrome — по желанию,
+`winget install Google.Chrome`.
+
+**Закройте и откройте терминал заново** после установки Node — иначе `node`
+не появится в PATH. Это причина №1 обращений «у меня не работает».
+
+## Linux
+
+1. **git** — из пакетного менеджера:
+
+```bash
+sudo apt update && sudo apt install -y git curl      # Debian / Ubuntu
+sudo dnf install -y git curl                          # Fedora / RHEL
+```
+
+2. **Node.js 20+** — тот же дистрибутив, что и MSI на Windows:
+
+```bash
+curl -fsSLO https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz
+sudo tar -xJf node-v24.20.0-linux-x64.tar.xz -C /usr/local --strip-components=1
+node --version                                        # ожидаем v24.20.0
+```
+
+Для ARM замените `linux-x64` на `linux-arm64`.
+
+Альтернатива через пакетный менеджер (nodesource):
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+**Node из штатного apt обычно слишком старый** (в Debian 12 — 18.x), а проекту
+нужен 20+. Ставьте tarball или nodesource, иначе `npm test` не запустится.
+
+3. **Claude Code**:
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+**Без sudo.** Установщик ставит агента в `$HOME/.local/bin` и под sudo
+откажется работать: иначе бинарник уехал бы в домашнюю папку root, и команда
+`claude` не нашлась бы в вашей оболочке. Если каталога нет в PATH:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+Установщик сам определяет архитектуру (x64/arm64) и различает glibc и musl,
+так что Alpine тоже поддержан. Скачанный бинарник сверяется по SHA256.
+
+Браузер: Chrome или Chromium из репозитория дистрибутива — нужен настоящий
+`getUserMedia`, поэтому Firefox для ручного сценария не подойдёт.
 
 ## macOS
 
 ```bash
-brew install node git
+brew install git node
 brew install --cask google-chrome
-npm install -g @anthropic-ai/claude-code
-claude
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-## Linux (Debian/Ubuntu)
+Тот же `install.sh`, без sudo. Для Intel-маков он ставит arm64-сборку под
+Rosetta — это ожидаемое поведение установщика.
+
+## После установки — на всех системах
 
 ```bash
-sudo apt update && sudo apt install -y git curl
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-npm install -g @anthropic-ai/claude-code
+claude        # первый запуск проводит авторизацию; требует интернета
 ```
-
-Браузер — Chrome или Chromium из репозитория дистрибутива.
 
 ---
 
@@ -201,6 +247,7 @@ SSO, MFA и лимиты аккаунта всплывают в самый не�
 ```bash
 node setup/fetch-claude.mjs                  # обе платформы Windows
 node setup/fetch-claude.mjs latest win32-x64 # только x64, если ARM не нужен
+node setup/fetch-claude.mjs latest linux-x64 # для Linux-ноутбуков
 ```
 
 Скрипт делает то же, что официальный установщик — включая сверку SHA256, —
@@ -210,16 +257,22 @@ node setup/fetch-claude.mjs latest win32-x64 # только x64, если ARM н
 setup/offline/2.1.260/
 ├── manifest.json
 ├── claude-win32-x64.exe      ~208 МБ
-└── claude-win32-arm64.exe    ~208 МБ
+├── claude-win32-arm64.exe    ~208 МБ
+└── claude-linux-x64          ~205 МБ
 ```
 
 Папка в git не попадает (`.gitignore`). Раздаётся флешкой или локальной шарой
-вместе с `setup/install-claude-offline.ps1`.
+вместе с `setup/install-claude-offline.ps1` (Windows) или
+`setup/install-claude-offline.sh` (Linux / macOS).
 
 ### Установка у участника (без сети)
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup\install-claude-offline.ps1
+```
+
+```bash
+bash setup/install-claude-offline.sh
 ```
 
 Скрипт сам определит платформу, сверит SHA256 с локальным манифестом и

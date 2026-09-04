@@ -49,7 +49,11 @@ for (const platform of platforms) {
     continue;
   }
 
-  const url = `${BASE}/${version}/${platform}/claude.exe`;
+  // На Windows бинарник называется claude.exe, на остальных платформах — claude.
+  const isWin = platform.startsWith('win32');
+  const remoteName = isWin ? 'claude.exe' : 'claude';
+
+  const url = `${BASE}/${version}/${platform}/${remoteName}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${url}`);
   const bytes = Buffer.from(await res.arrayBuffer());
@@ -60,8 +64,9 @@ for (const platform of platforms) {
     throw new Error(`${platform}: контрольная сумма не совпала — файл не сохранён`);
   }
 
-  const file = join(dir, `claude-${platform}.exe`);
-  await writeFile(file, bytes);
+  const file = join(dir, `claude-${platform}${isWin ? '.exe' : ''}`);
+  // На Unix бинарник должен быть исполняемым, иначе участник упрётся в EACCES.
+  await writeFile(file, bytes, isWin ? undefined : { mode: 0o755 });
   const mb = (bytes.length / 1024 / 1024).toFixed(1);
   console.log(`  ${platform}: ${mb} МБ, SHA256 сверен`);
 }
