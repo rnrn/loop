@@ -11,7 +11,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   ROOT, WORKSHOP, CHECKPOINTS, CHECKPOINT_NAMES, NPM,
-  run, testCounts, nodeMajor, ok, fail, warn, info, step,
+  run, testCounts, nodeMajor, ok, fail, soft, warn, info, step,
 } from './shared.mjs';
 
 const args = process.argv.slice(2);
@@ -92,10 +92,10 @@ const install = run(NPM, ['install', '--no-audit', '--no-fund'], { stdio: 'inher
 if (install.status === 0) {
   ok('npm install выполнен (playwright)');
 } else {
-  fail('npm install завершился с ошибкой');
+  // Некритично: занятие проводится и без этих пакетов.
+  soft('npm install завершился с ошибкой');
   info('Если машина без интернета — сценарий в браузере будет недоступен,');
   info('но сам мастер-класс работает: npm run dev и npm test зависимостей не требуют.');
-  problems += 1;
 }
 
 // --- 4. браузер ------------------------------------------------------------

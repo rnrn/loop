@@ -14,18 +14,32 @@ export const CHECKPOINT_NAMES = [
   'checkpoint-03-collapse',
 ];
 
+// Яркие варианты (9x) вместо базовых (3x): на тёмной теме терминала и на
+// проекторе базовый красный/жёлтый читаются плохо. NO_COLOR=1 отключает цвет.
+const COLOR = !process.env.NO_COLOR;
+const ESC = '\u001b[';
+const c = (code) => (COLOR ? `${ESC}${code}m` : '');
+
 const C = {
-  reset: '[0m',
-  dim: '[2m',
-  red: '[31m',
-  green: '[32m',
-  yellow: '[33m',
-  bold: '[1m',
+  reset: c(0),
+  dim: c(2),
+  bold: c(1),
+  green: c('1;92'),
+  yellow: c('1;93'),
+  red: c('1;91'),
 };
 
+// Шкала серьёзности. Красный зарезервирован за одним случаем: сломан сам
+// учебный материал. Всё остальное — жёлтое, потому что в этом курсе неуспех
+// сплошь и рядом является нормой: ожидаемый FAIL это вход в цикл, а не авария.
+//
+//   [ OK ]   зелёный   всё как задумано
+//   [ !! ]   жёлтый    некритично: чинится, обходится или так и должно быть
+//   [BROKEN] красный   материал непригоден для занятия
 export const ok = (msg) => console.log(`${C.green}[ OK ]${C.reset} ${msg}`);
-export const fail = (msg) => console.log(`${C.red}[FAIL]${C.reset} ${msg}`);
-export const warn = (msg) => console.log(`${C.yellow}[WARN]${C.reset} ${msg}`);
+export const soft = (msg) => console.log(`${C.yellow}[ !! ]${C.reset} ${msg}`);
+export const warn = soft;
+export const fail = (msg) => console.log(`${C.red}[BROKEN]${C.reset} ${msg}`);
 export const info = (msg) => console.log(`${C.dim}       ${msg}${C.reset}`);
 export const step = (msg) => console.log(`\n${C.bold}${msg}${C.reset}`);
 
