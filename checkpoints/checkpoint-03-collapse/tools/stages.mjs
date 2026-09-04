@@ -31,6 +31,8 @@ export function createColors(stream = process.stdout) {
     bold: c(1),
     green: c('1;92'),
     yellow: c('1;93'),
+    // Обычный жёлтый — «нужны твои руки»; жирный — «требует внимания сейчас».
+    yellowPlain: c('93'),
   };
 }
 

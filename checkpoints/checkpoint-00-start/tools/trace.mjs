@@ -10,7 +10,9 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, STAGES, readState, openStages, allCriteria, createColors } from './stages.mjs';
 
-const { reset: RESET, green: GREEN, yellow: YELLOW, dim: DIM, bold: BOLD } = createColors();
+const {
+  reset: RESET, green: GREEN, yellow: YELLOW, yellowPlain: MANUAL, dim: DIM, bold: BOLD,
+} = createColors();
 
 const all = process.argv.includes('--all');
 const stages = all ? STAGES : openStages(readState());
@@ -48,7 +50,8 @@ for (const stage of stages) {
         problems += 1;
       }
     } else {
-      console.log(`  ${DIM}${crit.id}  ${crit.text}  — ручной сценарий${RESET}`);
+      // Ручные критерии выделяем: автоматика их не поймает, проверяет только человек.
+      console.log(`  ${MANUAL}${crit.id}${RESET}  ${crit.text}  ${MANUAL}— ручной сценарий${RESET}`);
     }
   }
 
