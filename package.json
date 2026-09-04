@@ -7,26 +7,23 @@
   "scripts": {
     "bootstrap": "node scripts/bootstrap.mjs",
     "preflight": "node scripts/preflight.mjs",
-
     "dev": "npm --prefix voice-notes-workshop run dev",
     "test": "npm --prefix voice-notes-workshop test",
     "test:all": "npm --prefix voice-notes-workshop run test:all",
     "trace": "npm --prefix voice-notes-workshop run trace",
     "trace:all": "npm --prefix voice-notes-workshop run trace:all",
-
     "story": "npm --prefix voice-notes-workshop run story",
     "story:next": "npm --prefix voice-notes-workshop run story:next",
     "story:reset": "npm --prefix voice-notes-workshop run story:reset",
-
     "scenario": "node scenario-run/manual-run.mjs",
     "scenario:story1": "node scenario-run/manual-run.mjs story1",
     "scenario:fallback": "node scenario-run/manual-run.mjs fallback",
     "scenario:story2": "node scenario-run/manual-run.mjs story2",
     "scenario:cr": "node scenario-run/manual-run.mjs cr",
     "scenario:all": "node scripts/run-all-scenarios.mjs",
-
     "checkpoint": "node scripts/checkpoint.mjs",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "gate": "npm --prefix voice-notes-workshop run gate"
   },
   "devDependencies": {
     "playwright": "^1.62.1"

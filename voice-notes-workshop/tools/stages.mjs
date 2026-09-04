@@ -61,6 +61,9 @@ export const STAGES = [
     title: 'Story 2 — расшифровка',
     doc: 'stories/2-add-transcription.md',
     tests: ['tests/speech-recognition.test.js'],
+    // Гейт этого этапа участник пишет сам: тестов в стартере нет.
+    // Story 1 учит проходить цикл, Story 2 — создавать проверку (LOOP.md).
+    authoring: true,
     criteria: [
       { id: 'S2-01', text: 'Поддержка определяется через SpeechRecognition или webkitSpeechRecognition', check: 'auto' },
       { id: 'S2-02', text: 'При наличии конструктора используется язык ru-RU', check: 'auto' },

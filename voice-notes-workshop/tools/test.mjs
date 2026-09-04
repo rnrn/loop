@@ -37,6 +37,22 @@ if (all) {
   console.log(`${DIM}Весь набор целиком: npm run test:all${RESET}\n`);
 }
 
+// Этап, гейт которого пишет участник: молча зеленеть на чужих тестах нельзя.
+if (!all && active.authoring && testFiles([active]).length === 0) {
+  console.log(`${YELLOW}ГЕЙТА НЕТ${RESET} — для этапа «${active.title}» тесты ещё не написаны.`);
+  console.log('');
+  console.log(`${DIM}Story 1 шла с готовыми тестами. Здесь проверку создаёте вы:${RESET}`);
+  console.log(`${DIM}это и есть ответ на вопрос «откуда берутся тесты» (LOOP.md).${RESET}`);
+  console.log('');
+  console.log(`  1. ${active.doc} — acceptance criteria с кодами`);
+  console.log(`  2. напишите ${active.tests.join(', ')} — отдельным проходом, без реализации`);
+  console.log('  3. npm run gate — убедиться, что гейт зафиксирован и КРАСНЫЙ');
+  console.log('  4. только потом реализация');
+  console.log('');
+  console.log(`${DIM}Тест, который ни разу не падал, ничего не доказывает.${RESET}`);
+  process.exit(2);
+}
+
 if (files.length === 0) {
   console.error('Не найдено ни одного тест-файла для активного этапа.');
   process.exit(1);

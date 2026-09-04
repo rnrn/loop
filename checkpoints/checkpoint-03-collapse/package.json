@@ -13,7 +13,8 @@
     "story": "node tools/story.mjs",
     "story:next": "node tools/story.mjs next",
     "story:set": "node tools/story.mjs set",
-    "story:reset": "node tools/story.mjs reset"
+    "story:reset": "node tools/story.mjs reset",
+    "gate": "node tools/gate.mjs"
   },
   "engines": {
     "node": ">=20"

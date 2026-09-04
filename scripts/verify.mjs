@@ -66,11 +66,11 @@ try {
   record('checkpoint-01 на Story 1 зелёный', before.fail === 0 && before.pass === 9, `pass ${before.pass}/${before.tests}`);
 
   run(process.execPath, ['tools/story.mjs', 'set', 'story-2'], { cwd: probe, stdio: 'pipe' });
-  const after = testCounts(probe);
+  const after = run(NPM, ['--prefix', probe, 'test'], { stdio: 'pipe' });
   record(
-    'после story:set story-2 появляется FAIL нового этапа',
-    after.fail > 0 && after.pass === 9,
-    `pass ${after.pass}/${after.tests}, fail ${after.fail}`,
+    'после открытия Story 2 гейта нет — npm test требует сначала написать тесты',
+    after.status === 2 && `${after.stdout}`.includes('ГЕЙТА НЕТ'),
+    `exit=${after.status}`,
   );
 } finally {
   rmSync(probe, { recursive: true, force: true });
