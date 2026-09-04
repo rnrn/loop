@@ -67,10 +67,11 @@ try {
 
   run(process.execPath, ['tools/story.mjs', 'set', 'story-2'], { cwd: probe, stdio: 'pipe' });
   const after = run(NPM, ['--prefix', probe, 'test'], { stdio: 'pipe' });
+  const out = `${after.stdout}`;
   record(
-    'после открытия Story 2 гейта нет — npm test требует сначала написать тесты',
-    after.status === 2 && `${after.stdout}`.includes('ГЕЙТА НЕТ'),
-    `exit=${after.status}`,
+    'после открытия Story 2 этап пустой — npm test требует сначала спеку и гейт',
+    after.status === 2 && (out.includes('СПЕКИ НЕТ') || out.includes('ГЕЙТА НЕТ')),
+    `exit=${after.status}, ${out.includes('СПЕКИ НЕТ') ? 'СПЕКИ НЕТ' : 'ГЕЙТА НЕТ'}`,
   );
 } finally {
   rmSync(probe, { recursive: true, force: true });

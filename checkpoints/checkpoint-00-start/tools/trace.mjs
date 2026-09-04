@@ -8,7 +8,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, STAGES, readState, openStages, allCriteria, createColors } from './stages.mjs';
+import { ROOT, STAGES, readState, openStages, allCriteria, readCriteria, createColors } from './stages.mjs';
 
 const {
   reset: RESET, green: GREEN, yellow: YELLOW, yellowPlain: MANUAL, dim: DIM, bold: BOLD,
@@ -39,8 +39,22 @@ for (const stage of stages) {
   console.log(`${DIM}${stage.doc}${RESET}\n`);
 
   const tests = testIdsOf(stage);
+  const criteria = readCriteria(stage);
 
-  for (const crit of stage.criteria ?? []) {
+  if (criteria === null) {
+    console.log(`  ${YELLOW}Story не написана${RESET} — файла ${stage.doc} нет.`);
+    console.log(`  ${DIM}Этот этап начинается со спеки: сформулируйте критерии с кодами.${RESET}`);
+    problems += 1;
+    continue;
+  }
+
+  if (criteria.length === 0) {
+    console.log(`  ${YELLOW}В Story нет таблицы критериев${RESET} — trace нечего показывать.`);
+    problems += 1;
+    continue;
+  }
+
+  for (const crit of criteria) {
     const count = tests.get(crit.id) ?? 0;
     if (crit.check === 'auto') {
       if (count > 0) {
@@ -64,7 +78,7 @@ for (const stage of stages) {
   }
 }
 
-const shown = stages.flatMap((s) => s.criteria ?? []);
+const shown = stages.flatMap((s) => readCriteria(s) ?? []);
 const auto = shown.filter((x) => x.check === 'auto').length;
 
 console.log(`\n${DIM}Критериев: ${shown.length} — из них ${auto} закрыты npm test, ` +

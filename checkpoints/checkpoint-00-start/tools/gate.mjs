@@ -7,7 +7,7 @@
 // он либо проверяет не то, либо не проверяет ничего.
 
 import { spawnSync } from 'node:child_process';
-import { ROOT, STAGES, readState, activeIndex, testFiles, createColors } from './stages.mjs';
+import { ROOT, STAGES, readState, activeIndex, testFiles, readCriteria, createColors } from './stages.mjs';
 
 const { reset: RESET, green: GREEN, yellow: YELLOW, dim: DIM, bold: BOLD } = createColors();
 
@@ -17,6 +17,11 @@ const files = testFiles([active]);
 
 console.log(`${BOLD}Гейт этапа: ${active.title}${RESET}`);
 console.log(`${DIM}${active.doc}${RESET}\n`);
+
+if (readCriteria(active) === null) {
+  console.log(`${YELLOW}СПЕКИ НЕТ${RESET} — файла ${active.doc} нет. Этап начинается со спеки.`);
+  process.exit(2);
+}
 
 if (files.length === 0) {
   console.log(`${YELLOW}ГЕЙТА НЕТ${RESET} — тесты этапа не написаны: ${active.tests.join(', ')}`);

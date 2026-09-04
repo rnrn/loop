@@ -6,6 +6,9 @@
 // по своей задаче, а не по всему курсу.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+// Критерии читаются ИЗ Story, а не хранятся здесь: Story — единственный
+// источник истины. Иначе участник, написавший свою спеку, увидел бы в trace
+// чужие критерии.
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -42,19 +45,6 @@ export const STAGES = [
     title: 'Story 1 — запись аудио',
     doc: 'stories/1-record-audio.md',
     tests: ['tests/recordings-store.test.js'],
-    // Коды acceptance criteria. Ими же начинаются имена тестов и пункты
-    // ручного сценария, поэтому порядок появления фичи виден везде одинаково.
-    // check: auto — закрывается unit-тестом, manual — только браузером (§7.1).
-    criteria: [
-      { id: 'S1-01', text: 'Доступ к микрофону запрашивается отдельной кнопкой', check: 'manual' },
-      { id: 'S1-02', text: 'После разрешения интерфейс переходит в READY', check: 'auto' },
-      { id: 'S1-03', text: 'pointerdown начинает запись только из READY', check: 'auto' },
-      { id: 'S1-04', text: 'pointerup и pointercancel безопасно останавливают запись', check: 'auto' },
-      { id: 'S1-05', text: 'После остановки создаётся Blob и карточка с audio controls', check: 'auto' },
-      { id: 'S1-06', text: 'Новая карточка добавляется в начало списка', check: 'auto' },
-      { id: 'S1-07', text: 'Можно создать не менее двух записей', check: 'manual' },
-      { id: 'S1-08', text: 'Ошибка доступа показана и не роняет приложение', check: 'auto' },
-    ],
   },
   {
     id: 'story-2',
@@ -64,15 +54,6 @@ export const STAGES = [
     // Гейт этого этапа участник пишет сам: тестов в стартере нет.
     // Story 1 учит проходить цикл, Story 2 — создавать проверку (LOOP.md).
     authoring: true,
-    criteria: [
-      { id: 'S2-01', text: 'Поддержка определяется через SpeechRecognition или webkitSpeechRecognition', check: 'auto' },
-      { id: 'S2-02', text: 'При наличии конструктора используется язык ru-RU', check: 'auto' },
-      { id: 'S2-03', text: 'Собираются только финальные результаты', check: 'auto' },
-      { id: 'S2-04', text: 'Результат связывается с id соответствующей записи', check: 'auto' },
-      { id: 'S2-05', text: 'STT может завершиться позже создания аудиокарточки', check: 'auto' },
-      { id: 'S2-06', text: 'Отсутствие или ошибка STT не удаляют и не блокируют аудио', check: 'auto' },
-      { id: 'S2-07', text: 'При неподдерживаемом STT показано «Расшифровка недоступна»', check: 'manual' },
-    ],
   },
   {
     id: 'change-request',
@@ -80,21 +61,32 @@ export const STAGES = [
     doc: 'change-requests/1-collapse-long-transcripts.md',
     tests: ['tests/collapse-transcript.test.js'],
     optional: true,
-    criteria: [
-      { id: 'CR-01', text: 'Свёрнутый текст занимает максимум четыре строки', check: 'manual' },
-      { id: 'CR-02', text: 'Ограничивается только блок расшифровки', check: 'manual' },
-      { id: 'CR-03', text: 'Аудиоплеер и метаданные всегда видимы', check: 'manual' },
-      { id: 'CR-04', text: 'Клик по тексту или кнопке переключает expanded', check: 'manual' },
-      { id: 'CR-05', text: 'Клик по audio не переключает expanded', check: 'manual' },
-      { id: 'CR-06', text: 'Состояние expanded хранится для конкретной записи', check: 'auto' },
-      { id: 'CR-07', text: 'Интерактивный элемент имеет aria-expanded', check: 'manual' },
-    ],
   },
 ];
 
+/**
+ * Критерии этапа читаются из его Story. Ожидается таблица вида:
+ *
+ *   Код   | Критерий                        | Чем проверяется
+ *   S2-01 | Поддержка определяется через ... | `npm test`
+ *
+ * Признак «закрывается тестом» — упоминание npm test в третьей колонке.
+ * Всё остальное считается ручной проверкой.
+ */
+export function readCriteria(stage) {
+  const file = join(ROOT, stage.doc);
+  if (!existsSync(file)) return null; // Story ещё не написана
+  const rows = [];
+  for (const line of readFileSync(file, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z]{1,2}\d?-\d{2})\s*\|\s*(.+?)\s*\|\s*(.+?)\s*$/);
+    if (m) rows.push({ id: m[1], text: m[2], check: /npm\s+test/.test(m[3]) ? 'auto' : 'manual' });
+  }
+  return rows;
+}
+
 /** Все критерии подряд, в порядке появления функциональности. */
 export function allCriteria(stages = STAGES) {
-  return stages.flatMap((s) => (s.criteria ?? []).map((c) => ({ ...c, stage: s })));
+  return stages.flatMap((s) => (readCriteria(s) ?? []).map((c) => ({ ...c, stage: s })));
 }
 
 export const FIRST_STAGE = STAGES[0].id;

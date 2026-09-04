@@ -5,7 +5,7 @@
 //   npm test -- --color оставить собственную раскраску node:test (красный)
 
 import { spawn } from 'node:child_process';
-import { ROOT, STAGES, readState, openStages, testFiles, activeIndex, createColors } from './stages.mjs';
+import { ROOT, STAGES, readState, openStages, testFiles, activeIndex, readCriteria, createColors } from './stages.mjs';
 
 // Цвет: красный не используем. В этом курсе падение теста — штатное событие,
 // с него начинается цикл. Но выделение упавших строк нужно, иначе взгляду
@@ -37,20 +37,27 @@ if (all) {
   console.log(`${DIM}Весь набор целиком: npm run test:all${RESET}\n`);
 }
 
-// Этап, гейт которого пишет участник: молча зеленеть на чужих тестах нельзя.
-if (!all && active.authoring && testFiles([active]).length === 0) {
-  console.log(`${YELLOW}ГЕЙТА НЕТ${RESET} — для этапа «${active.title}» тесты ещё не написаны.`);
-  console.log('');
-  console.log(`${DIM}Story 1 шла с готовыми тестами. Здесь проверку создаёте вы:${RESET}`);
-  console.log(`${DIM}это и есть ответ на вопрос «откуда берутся тесты» (LOOP.md).${RESET}`);
-  console.log('');
-  console.log(`  1. ${active.doc} — acceptance criteria с кодами`);
-  console.log(`  2. напишите ${active.tests.join(', ')} — отдельным проходом, без реализации`);
-  console.log('  3. npm run gate — убедиться, что гейт зафиксирован и КРАСНЫЙ');
-  console.log('  4. только потом реализация');
-  console.log('');
-  console.log(`${DIM}Тест, который ни разу не падал, ничего не доказывает.${RESET}`);
-  process.exit(2);
+// Этап, который участник делает с нуля: молча зеленеть на чужих тестах нельзя.
+if (!all && active.authoring) {
+  const noStory = readCriteria(active) === null;
+  const noGate = testFiles([active]).length === 0;
+
+  if (noStory || noGate) {
+    const what = noStory ? 'СПЕКИ НЕТ' : 'ГЕЙТА НЕТ';
+    console.log(`${YELLOW}${what}${RESET} — этап «${active.title}» ещё не готов к проверке.`);
+    console.log('');
+    console.log(`${DIM}Story 1 шла с готовой спекой и готовыми тестами.${RESET}`);
+    console.log(`${DIM}Здесь вы создаёте и то и другое — см. LOOP.md, «Откуда берутся тесты».${RESET}`);
+    console.log('');
+    console.log(`  ${noStory ? '→' : '✓'} 1. ${active.doc} — спека: критерии с кодами в таблице`);
+    console.log(`  ${noStory || noGate ? '→' : '✓'} 2. ${active.tests.join(', ')} — гейт, отдельным проходом, без реализации`);
+    console.log('    3. npm run gate — гейт обязан быть КРАСНЫМ');
+    console.log('    4. человек читает тесты и замораживает их');
+    console.log('    5. только теперь реализация');
+    console.log('');
+    console.log(`${DIM}Тест, который ни разу не падал, ничего не доказывает.${RESET}`);
+    process.exit(2);
+  }
 }
 
 if (files.length === 0) {
