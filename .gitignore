@@ -9,3 +9,7 @@ doc.txt
 
 # рабочие снимки модератора, создаваемые через `npm run checkpoint -- save`
 checkpoints/before-rollback/
+
+# Бинарники агента для офлайн-раздачи (~200 МБ на платформу).
+# Готовятся модератором: node setup/fetch-claude.mjs
+setup/offline/
