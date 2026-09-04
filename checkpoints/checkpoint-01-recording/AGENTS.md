@@ -1,11 +1,22 @@
 # Agent instructions
 
-- Read SPEC.md and LOOP.md before editing.
-- Work on only the file named by the user.
-- Prefer minimal changes.
-- Do not implement future stories.
-- Do not change tests unless the user explicitly requests it.
-- Run npm test after changes.
-- On failure, explain the root cause and retry.
-- Stop after PASS or after three failed attempts.
-- Record evidence in progress.md only after verification.
+Читай в этом порядке, до любых правок:
+
+1. `SPEC.md` — цель, состояния, границы и non-goals.
+2. `LOOP.md` — цикл, команды, запреты и правила остановки.
+3. Текущую Story из `stories/` — acceptance criteria с кодами.
+4. Тесты активного этапа — они показывают ожидаемые контракты.
+
+Правила работы:
+
+- Работай ровно над одной Story, названной пользователем.
+- Минимальные изменения. Не рефакторь то, что задача не просит.
+- Не реализуй критерии будущих этапов, даже если их файлы уже в репозитории.
+- Не изменяй тесты. Тесты — независимый гейт, а не то, что подгоняют под код.
+- После правок запускай `npm test` (активный этап). `npm run test:all` не запускай.
+- При FAIL: назови первопричину, исправь её, повтори проверку.
+- Остановись после PASS активного этапа или после трёх неудачных попыток.
+- Не переключай этап и не трогай `workshop.state.json`, `tools/`, `checkpoints/`.
+- Не пиши в `progress.md` статус done: зелёный `npm test` закрывает не все
+  критерии. Ручные пункты из `npm run trace` проверяет человек в браузере.
+- Не делай коммитов и не пушь.
