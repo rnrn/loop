@@ -26,9 +26,13 @@ npm run bootstrap
 (рабочее дерево обязано быть зелёным, `checkpoint-00-start` — красным).
 
 ```bash
+npm run bootstrap -- --participant     # участнику: без playwright и Chromium
 npm run bootstrap -- --skip-browsers   # без Chromium (~150 МБ)
 npm run bootstrap -- --quick           # без финальной самопроверки
 ```
+
+Автопрогон сценария использует **уже установленный Edge или Chrome** и только
+при их отсутствии — Chromium из playwright. Скачивать 150 МБ обычно не нужно.
 
 **Сам мастер-класс зависимостей не имеет.** `npm run dev` и `npm test` работают
 на голом Node (`node:http`, `node:test`), как требует §3.5. npm-пакеты нужны

@@ -18,6 +18,14 @@ const TYPES = {
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
+
+  // Браузер сам просит favicon. Без ответа он пишет 404 в консоль, а участник
+  // по ручному сценарию должен видеть консоль чистой (§7.5).
+  if (url.pathname === '/favicon.ico') {
+    res.writeHead(204).end();
+    return;
+  }
+
   const rel = url.pathname === '/' ? '/index.html' : url.pathname;
   const filePath = join(ROOT, normalize(rel).replace(/^(\.\.[/\\])+/, ''));
 

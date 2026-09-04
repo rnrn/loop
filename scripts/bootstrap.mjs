@@ -2,6 +2,7 @@
 //
 //   npm run bootstrap                 полная установка + самопроверка
 //   npm run bootstrap -- --skip-browsers   без скачивания Chromium (~150 МБ)
+//   npm run bootstrap -- --participant     без playwright и Chromium (участнику)
 //   npm run bootstrap -- --quick           без финальной самопроверки
 //
 // Сам мастер-класс зависимостей не имеет: npm-пакеты нужны только
@@ -15,7 +16,10 @@ import {
 } from './shared.mjs';
 
 const args = process.argv.slice(2);
-const skipBrowsers = args.includes('--skip-browsers');
+// Участнику не нужен ни playwright, ни Chromium: они обслуживают только
+// автопрогон ручного сценария, то есть инструмент модератора.
+const participant = args.includes('--participant');
+const skipBrowsers = args.includes('--skip-browsers') || participant;
 const quick = args.includes('--quick');
 let problems = 0;
 
@@ -88,8 +92,15 @@ if (presentCheckpoints.length === CHECKPOINT_NAMES.length) {
 
 step('3/5  Зависимости прогона сценария');
 
-const install = run(NPM, ['install', '--no-audit', '--no-fund'], { stdio: 'inherit' });
-if (install.status === 0) {
+const install = participant
+  ? { status: 0, skipped: true }
+  : run(NPM, ['install', '--no-audit', '--no-fund'], { stdio: 'inherit' });
+
+if (install.skipped) {
+  ok('Режим участника: зависимости не нужны');
+  info('npm run dev, npm test, trace, gate и story работают на голом Node.');
+  info('playwright обслуживает только автопрогон сценария — это инструмент модератора.');
+} else if (install.status === 0) {
   ok('npm install выполнен (playwright)');
 } else {
   // Некритично: занятие проводится и без этих пакетов.
@@ -102,7 +113,9 @@ if (install.status === 0) {
 
 step('4/5  Chromium для ручного сценария');
 
-if (skipBrowsers) {
+if (participant) {
+  ok('Не требуется в режиме участника');
+} else if (skipBrowsers) {
   warn('Пропущено по флагу --skip-browsers');
   info('Позже: npx playwright install chromium');
 } else if (install.status !== 0) {

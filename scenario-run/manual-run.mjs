@@ -47,21 +47,49 @@ await new Promise((r) => setTimeout(r, 700));
 
 // --- browser ---------------------------------------------------------------
 
+const LAUNCH_ARGS = [
+  '--use-fake-device-for-media-stream',
+  '--use-fake-ui-for-media-stream',
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+// Сначала пробуем браузер, уже стоящий в системе: Edge есть на любой Windows,
+// Chrome — почти везде. Это экономит участнику загрузку Chromium (~150 МБ).
+// Скачанный playwright-ом Chromium используется как запасной вариант.
+const CANDIDATES = [
+  { channel: 'msedge', label: 'системный Edge' },
+  { channel: 'chrome', label: 'системный Chrome' },
+  { channel: undefined, label: 'Chromium из playwright' },
+];
+
 let browser;
-try {
-  browser = await chromium.launch({
-    args: [
-      '--use-fake-device-for-media-stream',
-      '--use-fake-ui-for-media-stream',
-      '--autoplay-policy=no-user-gesture-required',
-    ],
-  });
-} catch (error) {
+let usedLabel;
+const failures = [];
+
+for (const c of CANDIDATES) {
+  try {
+    browser = await chromium.launch({
+      args: LAUNCH_ARGS,
+      ...(c.channel ? { channel: c.channel } : {}),
+    });
+    usedLabel = c.label;
+    break;
+  } catch (error) {
+    failures.push(`${c.label}: ${String(error.message).split('\n')[0]}`);
+  }
+}
+
+if (!browser) {
   server.kill();
-  console.error(`Не удалось запустить Chromium: ${error.message}`);
-  console.error('\nСкорее всего не скачаны браузеры. Выполните:\n\n  npm run bootstrap\n');
+  console.error('Не удалось запустить ни один браузер:\n');
+  failures.forEach((f) => console.error(`  ${f}`));
+  console.error('\nВарианты:');
+  console.error('  npx playwright install chromium   скачать Chromium (~150 МБ)');
+  console.error('  либо установить Chrome или Edge — они будут использованы как есть');
   process.exit(2);
 }
+
+console.log(`Браузер: ${usedLabel}\n`);
 const context = await browser.newContext({ permissions: ['microphone'] });
 const page = await context.newPage();
 
